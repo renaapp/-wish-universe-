@@ -1,27 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_KEY
+);
 
 const TYPES = {
   wish: { label: "願い", emoji: "🌟", color: "#c8a96e", hint: "宇宙に放つ" },
   joy: { label: "嬉しかったこと", emoji: "✨", color: "#9b7fd4", hint: "感謝として放つ" },
   granted: { label: "叶ったこと", emoji: "💫", color: "#6db8d4", hint: "報告する" },
 };
-
-const STORAGE_KEY = "wish_universe_v1";
-
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { stars: [], shootingStarMessages: [] };
-  } catch {
-    return { stars: [], shootingStarMessages: [] };
-  }
-}
-
-function saveData(data) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {}
-}
 
 function randomPos() {
   return { x: 5 + Math.random() * 90, y: 5 + Math.random() * 85 };
@@ -160,7 +149,7 @@ function MatchMessage({ messages, onDismiss }) {
 }
 
 export default function WishUniverse() {
-  const [data, setData] = useState(loadData);
+  const [stars, setStars] = useState([]);
   const [input, setInput] = useState("");
   const [type, setType] = useState("wish");
   const [launching, setLaunching] = useState(false);
@@ -169,11 +158,17 @@ export default function WishUniverse() {
   const [checking, setChecking] = useState(false);
   const inputRef = useRef();
 
-  useEffect(() => { saveData(data); }, [data]);
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from("wish_universe_stars").select("*");
+      if (data) setStars(data);
+    };
+    load();
+  }, []);
 
   const checkMatch = useCallback(async (newEntry) => {
     if (newEntry.type !== "granted") return;
-    const wishes = data.stars.filter((s) => s.type === "wish");
+    const wishes = stars.filter((s) => s.type === "wish");
     if (!wishes.length) return;
 
     setChecking(true);
@@ -186,9 +181,7 @@ export default function WishUniverse() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-          }),
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
         }
       );
       const json = await res.json();
@@ -205,7 +198,7 @@ export default function WishUniverse() {
       }
     } catch {}
     setChecking(false);
-  }, [data.stars]);
+  }, [stars]);
 
   const launch = async () => {
     if (!input.trim() || launching) return;
@@ -214,7 +207,6 @@ export default function WishUniverse() {
     const pos = randomPos();
     const dateStr = new Date().toLocaleDateString("ja-JP", { month: "long", day: "numeric" });
     const newStar = {
-      id: Date.now(),
       type,
       text: input.trim(),
       date: dateStr,
@@ -222,12 +214,13 @@ export default function WishUniverse() {
       y: pos.y,
     };
 
-    setTimeout(() => {
-      setData((prev) => ({ ...prev, stars: [...prev.stars, newStar] }));
-      setInput("");
-      setLaunching(false);
-      checkMatch(newStar);
-    }, 600);
+    const { data, error } = await supabase.from("wish_universe_stars").insert([newStar]).select();
+    if (data) {
+      setStars((prev) => [...prev, data[0]]);
+      checkMatch(data[0]);
+    }
+    setInput("");
+    setLaunching(false);
   };
 
   return (
@@ -273,7 +266,7 @@ export default function WishUniverse() {
         .type-btn:hover { opacity: 1 !important; }
       `}</style>
 
-      <StarField stars={data.stars} shootingStars={shootingStars} />
+      <StarField stars={stars} shootingStars={shootingStars} />
 
       <div style={{ position: "relative", zIndex: 2, textAlign: "center", paddingTop: 40, paddingBottom: 8 }}>
         <div style={{ color: "rgba(200,169,110,0.5)", fontSize: 10, letterSpacing: 4 }}>
