@@ -30,7 +30,6 @@ function randomPos() {
 function StarField({ stars, shootingStars }) {
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-      {/* background tiny stars */}
       {Array.from({ length: 80 }).map((_, i) => (
         <div
           key={`bg-${i}`}
@@ -47,7 +46,6 @@ function StarField({ stars, shootingStars }) {
           }}
         />
       ))}
-      {/* user stars */}
       {stars.map((s) => (
         <div
           key={s.id}
@@ -92,7 +90,6 @@ function StarField({ stars, shootingStars }) {
           )}
         </div>
       ))}
-      {/* shooting stars */}
       {shootingStars.map((ss) => (
         <div
           key={ss.id}
@@ -182,37 +179,26 @@ export default function WishUniverse() {
     setChecking(true);
     try {
       const wishTexts = wishes.map((w, i) => `${i + 1}. [${w.date}] ${w.text}`).join("\n");
-      const prompt = `以下の「願い」リストと「叶ったこと」が意味的に近いものがあるか確認してください。
-叶ったこと：「${newEntry.text}」
+      const prompt = `以下の「願い」リストと「叶ったこと」が意味的に近いものがあるか確認してください。叶ったこと：「${newEntry.text}」\n\n願いリスト：\n${wishTexts}\n\n最も近い願いの番号を1つだけ返してください。近いものがなければ「0」を返してください。数字のみ回答。`;
 
-願いリスト：
-${wishTexts}
-
-最も近い願いの番号を1つだけ返してください。近いものがなければ「0」を返してください。数字のみ回答。`;
-
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 10,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        }
+      );
       const json = await res.json();
-      const num = parseInt(json.content?.[0]?.text?.trim() || "0");
+      const text = json.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "0";
+      const num = parseInt(text);
       if (num > 0 && wishes[num - 1]) {
         const matched = wishes[num - 1];
-        // show shooting star
         const ssId = Date.now();
         setShootingStars((prev) => [...prev, { id: ssId, x: matched.x, y: matched.y }]);
         setTimeout(() => setShootingStars((prev) => prev.filter((s) => s.id !== ssId)), 2000);
-        // show message
         setTimeout(() => {
           setMatchMessages((prev) => [...prev, { id: ssId, date: matched.date }]);
         }, 800);
@@ -243,10 +229,6 @@ ${wishTexts}
       checkMatch(newStar);
     }, 600);
   };
-
-  const starCount = data.stars.filter((s) => s.type === "wish").length;
-  const joyCount = data.stars.filter((s) => s.type === "joy").length;
-  const grantedCount = data.stars.filter((s) => s.type === "granted").length;
 
   return (
     <div
@@ -293,28 +275,15 @@ ${wishTexts}
 
       <StarField stars={data.stars} shootingStars={shootingStars} />
 
-      {/* header */}
       <div style={{ position: "relative", zIndex: 2, textAlign: "center", paddingTop: 40, paddingBottom: 8 }}>
-        <div style={{ color: "rgba(200,169,110,0.5)", fontSize: 10, letterSpacing: 4, marginBottom: 6 }}>
+        <div style={{ color: "rgba(200,169,110,0.5)", fontSize: 10, letterSpacing: 4 }}>
           U N I V E R S E
         </div>
-
       </div>
 
-      {/* spacer — sky takes up space */}
       <div style={{ flex: 1 }} />
 
-      {/* input area */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-          width: "100%",
-          maxWidth: 400,
-          padding: "0 20px 40px",
-        }}
-      >
-        {/* type selector */}
+      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 400, padding: "0 20px 40px" }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 12, justifyContent: "center" }}>
           {Object.entries(TYPES).map(([key, val]) => (
             <button
@@ -338,48 +307,25 @@ ${wishTexts}
           ))}
         </div>
 
-        {/* text input */}
-        <div
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 16,
-            padding: "14px 16px",
-            marginBottom: 12,
-          }}
-        >
+        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "14px 16px", marginBottom: 12 }}>
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={TYPES[type].hint + "…"}
             rows={3}
-            style={{
-              width: "100%",
-              background: "transparent",
-              border: "none",
-              color: "rgba(255,255,255,0.8)",
-              fontSize: 14,
-              fontFamily: "'Noto Serif JP', serif",
-              lineHeight: 1.7,
-              boxSizing: "border-box",
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) launch();
-            }}
+            style={{ width: "100%", background: "transparent", border: "none", color: "rgba(255,255,255,0.8)", fontSize: 14, fontFamily: "'Noto Serif JP', serif", lineHeight: 1.7, boxSizing: "border-box" }}
+            onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) launch(); }}
           />
         </div>
 
-        {/* launch button */}
         <button
           onClick={launch}
           disabled={!input.trim() || launching || checking}
           style={{
             width: "100%",
             padding: "14px",
-            background: input.trim() && !launching
-              ? `linear-gradient(135deg, ${TYPES[type].color}22, ${TYPES[type].color}44)`
-              : "rgba(255,255,255,0.03)",
+            background: input.trim() && !launching ? `linear-gradient(135deg, ${TYPES[type].color}22, ${TYPES[type].color}44)` : "rgba(255,255,255,0.03)",
             border: `1px solid ${input.trim() && !launching ? TYPES[type].color + "66" : "rgba(255,255,255,0.06)"}`,
             borderRadius: 12,
             color: input.trim() && !launching ? TYPES[type].color : "rgba(255,255,255,0.2)",
@@ -395,10 +341,7 @@ ${wishTexts}
         </button>
       </div>
 
-      <MatchMessage
-        messages={matchMessages}
-        onDismiss={() => setMatchMessages((prev) => prev.slice(1))}
-      />
+      <MatchMessage messages={matchMessages} onDismiss={() => setMatchMessages((prev) => prev.slice(1))} />
     </div>
   );
 }
