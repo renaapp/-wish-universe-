@@ -225,8 +225,8 @@ export default function WishUniverse() {
 
   return (
     <div
+      className="wish-app"
       style={{
-        minHeight: "100vh",
         background: "radial-gradient(ellipse at 30% 20%, #0d0820 0%, #040210 50%, #000008 100%)",
         position: "relative",
         overflow: "hidden",
@@ -238,6 +238,10 @@ export default function WishUniverse() {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&display=swap');
+        .wish-app {
+          height: 100vh;
+          height: 100dvh;
+        }
         @keyframes twinkle {
           0%, 100% { opacity: 0.4; transform: translate(-50%,-50%) scale(1); }
           50% { opacity: 1; transform: translate(-50%,-50%) scale(1.3); }
@@ -276,7 +280,7 @@ export default function WishUniverse() {
 
       <div style={{ flex: 1 }} />
 
-      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 400, padding: "0 20px 40px" }}>
+      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 400, padding: "0 20px", paddingBottom: "calc(40px + env(safe-area-inset-bottom))" }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 12, justifyContent: "center" }}>
           {Object.entries(TYPES).map(([key, val]) => (
             <button
