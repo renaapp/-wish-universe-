@@ -13,10 +13,10 @@ const TYPES = {
 };
 
 function randomPos() {
-  return { x: 5 + Math.random() * 90, y: 5 + Math.random() * 85 };
+  return { x: 5 + Math.random() * 90, y: 5 + Math.random() * 55 };
 }
 
-function StarField({ stars, shootingStars }) {
+function BackgroundStars() {
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
       {Array.from({ length: 80 }).map((_, i) => (
@@ -35,50 +35,13 @@ function StarField({ stars, shootingStars }) {
           }}
         />
       ))}
-      {stars.map((s) => (
-        <div
-          key={s.id}
-          style={{
-            position: "absolute",
-            left: `${s.x}%`,
-            top: `${s.y}%`,
-            transform: "translate(-50%, -50%)",
-            animation: `starAppear 0.8s ease-out both`,
-          }}
-        >
-          {s.type === "wish" && (
-            <div style={{
-              width: 10, height: 10,
-              borderRadius: "50%",
-              background: "white",
-              boxShadow: `0 0 4px 2px white, 0 0 12px 4px #c8a96e, 0 0 28px 8px rgba(200,169,110,0.4), 0 0 50px 14px rgba(200,169,110,0.15)`,
-              animation: `twinkle ${3 + Math.random() * 3}s ease-in-out infinite`,
-            }} />
-          )}
-          {s.type === "joy" && (
-            <div style={{ position: "relative", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ position: "absolute", width: "100%", height: 1.5, background: "linear-gradient(to right, transparent, #c9b8f0, transparent)", borderRadius: 4, opacity: 0.7 }} />
-              <div style={{ position: "absolute", width: 1.5, height: "100%", background: "linear-gradient(to bottom, transparent, #c9b8f0, transparent)", borderRadius: 4, opacity: 0.7 }} />
-              <div style={{ position: "absolute", width: 22, height: 1, background: "linear-gradient(to right, transparent, rgba(155,127,212,0.5), transparent)", transform: "rotate(45deg)" }} />
-              <div style={{ position: "absolute", width: 22, height: 1, background: "linear-gradient(to right, transparent, rgba(155,127,212,0.5), transparent)", transform: "rotate(-45deg)" }} />
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "white", boxShadow: "0 0 6px 2px rgba(155,127,212,0.9), 0 0 14px 5px rgba(155,127,212,0.4)", animation: `twinkle ${3 + Math.random() * 3}s ease-in-out infinite` }} />
-            </div>
-          )}
-          {s.type === "granted" && (
-            <div style={{ position: "relative", width: 40, height: 40, animation: `twinkle ${3 + Math.random() * 3}s ease-in-out infinite` }}>
-              {[
-                { width: 5, height: 36, margin: "-18px 0 0 -2.5px", background: "linear-gradient(to bottom, transparent, white 40%, white 60%, transparent)" },
-                { width: 36, height: 5, margin: "-2.5px 0 0 -18px", background: "linear-gradient(to right, transparent, white 40%, white 60%, transparent)" },
-                { width: 3, height: 22, margin: "-11px 0 0 -1.5px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.6) 50%, transparent)", transform: "rotate(45deg)" },
-                { width: 3, height: 22, margin: "-11px 0 0 -1.5px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.6) 50%, transparent)", transform: "rotate(-45deg)" },
-              ].map((st, i) => (
-                <span key={i} style={{ position: "absolute", top: "50%", left: "50%", display: "block", borderRadius: "50%", filter: "blur(0.5px)", ...st }} />
-              ))}
-              <span style={{ position: "absolute", top: "50%", left: "50%", width: 5, height: 5, margin: "-2.5px 0 0 -2.5px", borderRadius: "50%", background: "white", boxShadow: "0 0 6px 3px rgba(109,184,212,0.9), 0 0 16px 6px rgba(109,184,212,0.4)" }} />
-            </div>
-          )}
-        </div>
-      ))}
+    </div>
+  );
+}
+
+function ShootingStars({ shootingStars }) {
+  return (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
       {shootingStars.map((ss) => (
         <div
           key={ss.id}
@@ -96,6 +59,114 @@ function StarField({ stars, shootingStars }) {
           🌠
         </div>
       ))}
+    </div>
+  );
+}
+
+function WishStarShape({ type }) {
+  if (type === "wish") {
+    return (
+      <div style={{
+        width: 10, height: 10,
+        borderRadius: "50%",
+        background: "white",
+        boxShadow: `0 0 4px 2px white, 0 0 12px 4px #c8a96e, 0 0 28px 8px rgba(200,169,110,0.4), 0 0 50px 14px rgba(200,169,110,0.15)`,
+        animation: `twinkle ${3 + Math.random() * 3}s ease-in-out infinite`,
+      }} />
+    );
+  }
+  if (type === "joy") {
+    return (
+      <div style={{ position: "relative", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ position: "absolute", width: "100%", height: 1.5, background: "linear-gradient(to right, transparent, #c9b8f0, transparent)", borderRadius: 4, opacity: 0.7 }} />
+        <div style={{ position: "absolute", width: 1.5, height: "100%", background: "linear-gradient(to bottom, transparent, #c9b8f0, transparent)", borderRadius: 4, opacity: 0.7 }} />
+        <div style={{ position: "absolute", width: 22, height: 1, background: "linear-gradient(to right, transparent, rgba(155,127,212,0.5), transparent)", transform: "rotate(45deg)" }} />
+        <div style={{ position: "absolute", width: 22, height: 1, background: "linear-gradient(to right, transparent, rgba(155,127,212,0.5), transparent)", transform: "rotate(-45deg)" }} />
+        <div style={{ width: 6, height: 6, borderRadius: "50%", background: "white", boxShadow: "0 0 6px 2px rgba(155,127,212,0.9), 0 0 14px 5px rgba(155,127,212,0.4)", animation: `twinkle ${3 + Math.random() * 3}s ease-in-out infinite` }} />
+      </div>
+    );
+  }
+  if (type === "granted") {
+    return (
+      <div style={{ position: "relative", width: 40, height: 40, animation: `twinkle ${3 + Math.random() * 3}s ease-in-out infinite` }}>
+        {[
+          { width: 5, height: 36, margin: "-18px 0 0 -2.5px", background: "linear-gradient(to bottom, transparent, white 40%, white 60%, transparent)" },
+          { width: 36, height: 5, margin: "-2.5px 0 0 -18px", background: "linear-gradient(to right, transparent, white 40%, white 60%, transparent)" },
+          { width: 3, height: 22, margin: "-11px 0 0 -1.5px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.6) 50%, transparent)", transform: "rotate(45deg)" },
+          { width: 3, height: 22, margin: "-11px 0 0 -1.5px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.6) 50%, transparent)", transform: "rotate(-45deg)" },
+        ].map((st, i) => (
+          <span key={i} style={{ position: "absolute", top: "50%", left: "50%", display: "block", borderRadius: "50%", filter: "blur(0.5px)", ...st }} />
+        ))}
+        <span style={{ position: "absolute", top: "50%", left: "50%", width: 5, height: 5, margin: "-2.5px 0 0 -2.5px", borderRadius: "50%", background: "white", boxShadow: "0 0 6px 3px rgba(109,184,212,0.9), 0 0 16px 6px rgba(109,184,212,0.4)" }} />
+      </div>
+    );
+  }
+  return null;
+}
+
+function StarDetail({ star, onClose }) {
+  if (!star) return null;
+  const typeInfo = TYPES[star.type];
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.5)",
+        animation: "fadeInBg 0.3s ease-out",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "linear-gradient(135deg, rgba(30,20,50,0.98), rgba(20,10,40,0.98))",
+          border: `1px solid ${typeInfo.color}44`,
+          borderRadius: 20,
+          padding: "28px 28px 24px",
+          maxWidth: 300,
+          width: "85%",
+          textAlign: "center",
+          boxShadow: `0 0 40px ${typeInfo.color}22`,
+          animation: "popIn 0.3s ease-out",
+        }}
+      >
+        <div style={{ fontSize: 24, marginBottom: 12 }}>{typeInfo.emoji}</div>
+        <div style={{ color: typeInfo.color, fontSize: 10, letterSpacing: 3, marginBottom: 16, opacity: 0.7 }}>
+          {typeInfo.label.toUpperCase()}
+        </div>
+        <div style={{
+          color: "rgba(255,255,255,0.85)",
+          fontFamily: "'Noto Serif JP', serif",
+          fontSize: 15,
+          lineHeight: 1.8,
+          marginBottom: 16,
+        }}>
+          {star.text}
+        </div>
+        <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, marginBottom: 20 }}>
+          {star.date}
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            background: "transparent",
+            border: `1px solid ${typeInfo.color}44`,
+            borderRadius: 20,
+            color: `${typeInfo.color}99`,
+            padding: "6px 24px",
+            fontSize: 11,
+            cursor: "pointer",
+            fontFamily: "'Noto Serif JP', serif",
+          }}
+        >
+          閉じる
+        </button>
+      </div>
     </div>
   );
 }
@@ -156,6 +227,7 @@ export default function WishUniverse() {
   const [shootingStars, setShootingStars] = useState([]);
   const [matchMessages, setMatchMessages] = useState([]);
   const [checking, setChecking] = useState(false);
+  const [selectedStar, setSelectedStar] = useState(null);
   const inputRef = useRef();
 
   useEffect(() => {
@@ -258,6 +330,14 @@ export default function WishUniverse() {
           from { opacity: 0; transform: translateX(-50%) translateY(20px); }
           to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
+        @keyframes fadeInBg {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes popIn {
+          from { opacity: 0; transform: scale(0.85); }
+          to { opacity: 1; transform: scale(1); }
+        }
         @keyframes launch {
           0% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.6; transform: scale(1.4) translateY(-8px); }
@@ -268,9 +348,33 @@ export default function WishUniverse() {
         textarea { resize: none; }
         .type-btn { transition: all 0.2s ease; }
         .type-btn:hover { opacity: 1 !important; }
+        .wish-star { cursor: pointer; }
+        .wish-star:active { opacity: 0.7; }
       `}</style>
 
-      <StarField stars={stars} shootingStars={shootingStars} />
+      <BackgroundStars />
+      <ShootingStars shootingStars={shootingStars} />
+
+      {/* Interactive wish stars */}
+      {stars.map((s) => (
+        <div
+          key={s.id}
+          className="wish-star"
+          onClick={() => setSelectedStar(s)}
+          style={{
+            position: "absolute",
+            left: `${s.x}%`,
+            top: `${s.y}%`,
+            transform: "translate(-50%, -50%)",
+            animation: `starAppear 0.8s ease-out both`,
+            zIndex: 5,
+            padding: 12,
+            margin: -12,
+          }}
+        >
+          <WishStarShape type={s.type} />
+        </div>
+      ))}
 
       <div style={{ position: "relative", zIndex: 2, textAlign: "center", paddingTop: 40, paddingBottom: 8 }}>
         <div style={{ color: "rgba(200,169,110,0.5)", fontSize: 10, letterSpacing: 4 }}>
@@ -339,6 +443,7 @@ export default function WishUniverse() {
       </div>
 
       <MatchMessage messages={matchMessages} onDismiss={() => setMatchMessages((prev) => prev.slice(1))} />
+      <StarDetail star={selectedStar} onClose={() => setSelectedStar(null)} />
     </div>
   );
 }
